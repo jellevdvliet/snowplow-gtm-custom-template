@@ -1546,6 +1546,7 @@ const makeTableMap = require('makeTableMap');
 const getType = require('getType');
 const copyFromDataLayer = require('copyFromDataLayer');
 const log = require('logToConsole');
+const Object = require('Object');
 
 // Access the generic settings
 const globalName = data.globalName;
@@ -1663,6 +1664,20 @@ const getTrackerConfiguration = () => {
   }
   
   return config;
+};
+
+// Helper to transform string params to Array
+const transformStringParamsToArray = (paramObj) => {
+    var newParamObj = {};
+    for (var paramKey in paramObj) {
+      if(paramKey.indexOf("_2ARR") > -1) {
+        newParamObj[paramKey.replace("_2ARR", "")] = paramObj[paramKey].split(" ");
+        Object.delete(paramObj, paramKey);
+        continue;
+      }
+      newParamObj[paramKey] = paramObj[paramKey];
+    }
+    return newParamObj;
 };
 
 // Build the Snowplow global namespace and return the tracker
@@ -1860,7 +1875,7 @@ switch (data.eventType) {
 
     args.push(
       data.eventType,
-      { schema: data.selfDescribingEventSchemaUrl, data: paramObj }
+      { schema: data.selfDescribingEventSchemaUrl, data: transformStringParamsToArray(paramObj) }
     );
     break;
   case 'trackSocialInteraction':
